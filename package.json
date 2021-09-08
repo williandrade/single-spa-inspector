@@ -1,16 +1,23 @@
 {
   "name": "single-spa-inspector",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "A devtools extension for single-spa applications",
   "scripts": {
-    "build": "npm run webpack-build && npm run lint && web-ext build",
+    "prebuild": "npm run webpack-build && npm run lint",
+    "build": "web-ext build",
     "lint": "web-ext lint",
-    "start": "concurrently --kill-others-on-fail --names \"EXT,WPK\" -c \"cyan,magenta\" \"npm:start:firefox\" \"webpack --watch\"",
+    "start": "concurrently --kill-others-on-fail -s \"first\" --names \"EXT,WPK\" -c \"cyan,magenta\" \"npm:start:firefox\" \"webpack --watch\"",
     "start:firefox": "web-ext run --keep-profile-changes --firefox-profile=single-spa-inspector-dev",
     "start:firefoxdev": "npm run start:firefox -- --firefox=firefoxdeveloperedition",
+    "start:chrome": "concurrently --kill-others-on-fail -s \"first\" --names \"EXT,WPK\" -c \"cyan,magenta\" \"npm:start:chrome-profile\" \"webpack --watch\"",
+    "start:chrome-profile": "web-ext run --target chromium --chromium-profile \"$CHROME_PROFILE_PATH\"",
     "self-sign": "npm run webpack-build && npm run lint && web-ext sign",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "webpack-build": "webpack --mode=production"
+    "webpack-build": "webpack --mode=production",
+    "deploy": "npm run deploy:firefox && npm run deploy:chrome",
+    "deploy:firefox": "npm run prebuild && shipit firefox .",
+    "deploy:chrome": "npm run build -- --overwrite-dest && shipit chrome web-ext-artifacts/single-spa_inspector-$npm_package_version.zip",
+    "format": "prettier src/ --write"
   },
   "keywords": [
     "single-spa",
@@ -22,25 +29,26 @@
   "author": "Anthony Frehner",
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "^7.5.5",
-    "@babel/preset-env": "^7.5.5",
-    "@babel/preset-react": "^7.0.0",
-    "babel-loader": "^8.0.6",
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.5",
+    "@babel/preset-react": "^7.9.4",
+    "@wext/shipit": "^0.2.1",
+    "babel-loader": "^8.1.0",
     "clean-webpack-plugin": "^3.0.0",
-    "concurrently": "^4.1.1",
-    "copy-webpack-plugin": "^5.0.4",
-    "husky": "^3.0.2",
-    "prettier": "1.18.2",
-    "pretty-quick": "^1.11.1",
-    "web-ext": "^3.1.1",
-    "webpack": "^4.39.1",
-    "webpack-cli": "^3.3.6"
+    "concurrently": "^5.1.0",
+    "copy-webpack-plugin": "^5.1.1",
+    "husky": "^4.2.5",
+    "prettier": "2.0.4",
+    "pretty-quick": "^2.0.1",
+    "web-ext": "^4.1.0",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
   },
   "dependencies": {
-    "kremling": "^2.0.1",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
-    "webextension-polyfill": "^0.4.0"
+    "kremling": "^2.0.3",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "webextension-polyfill": "^0.6.0"
   },
   "browserslist": [
     "last 5 chrome version",

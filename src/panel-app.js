@@ -23,6 +23,13 @@ function PanelRoot(props) {
   }, []);
 
   useEffect(() => {
+    document.body.classList.add(props.theme);
+    return () => {
+      document.body.classList.remove(props.theme);
+    };
+  }, [props.theme]);
+
+  useEffect(() => {
     const boundEvtListener = contentScriptListener.bind(null, setApps);
     window.addEventListener("ext-content-script", boundEvtListener);
 
@@ -50,7 +57,7 @@ async function getApps(setAppsFn) {
 
 function contentScriptListener(setApps, msg) {
   if (msg.detail.from === "single-spa" && msg.detail.type === "routing-event") {
-    getApps(setApps).catch(err => {
+    getApps(setApps).catch((err) => {
       console.error("error in getting apps after update event");
       throw err;
     });
