@@ -5,6 +5,7 @@ export default function useImportMapOverrides() {
   const [importMapsEnabled, setImportMapEnabled] = useState(false);
   const [overrides, setOverrides] = useState({});
   const [appError, setAppError] = useState();
+  const [customName, setCustomName] = useState({});
 
   if (appError) {
     throw appError;
@@ -58,9 +59,10 @@ export default function useImportMapOverrides() {
 
   async function batchSetOverrides() {
     try {
-      const overrideCalls = Object.entries(overrides).map(([map, url]) =>
-        !url ? removeOverride(map) : addOverride(map, url)
-      );
+      const overrideCalls = Object.entries(overrides).map(([map, url]) => {
+        let newMap = customName[map]? customName[map]:map;
+        return !url ? removeOverride(newMap) : addOverride(newMap, url)
+      });
       await Promise.all(overrideCalls);
       await evalCmd(`window.location.reload()`);
     } catch (err) {
@@ -91,8 +93,6 @@ export default function useImportMapOverrides() {
     const newOverrides = {
       ...overrides,
       [mapping]: url,
-      ["@nutrien/" + mapping]: url,
-      ["@nutrien-axp/" + mapping]: url,
     };
     setOverrides(newOverrides);
   };
@@ -100,6 +100,8 @@ export default function useImportMapOverrides() {
   return {
     enabled: importMapsEnabled,
     overrides,
+    customName,
+    setCustomName,
     setOverride,
     commitOverrides: batchSetOverrides,
   };

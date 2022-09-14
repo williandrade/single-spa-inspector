@@ -16,57 +16,59 @@ export default function Profiler() {
   });
 
   useEffect(() => {
-    evalDevtoolsCmd("exposedMethods.getProfilerData()")
-      .then((evts) => {
-        if (filters.search.trim().length > 0) {
-          const fuse = new Fuse(evts, {
-            keys: ["name"],
-            includeMatches: false,
-            includeScore: false,
+    try{
+      evalDevtoolsCmd("exposedMethods.getProfilerData()")
+        .then((evts) => {
+          if (filters.search.trim().length > 0) {
+            const fuse = new Fuse(evts, {
+              keys: ["name"],
+              includeMatches: false,
+              includeScore: false,
+            });
+
+            evts = fuse.search(filters.search).map((i) => i.item);
+          }
+
+          evts = evts.filter((evt) => {
+            const hideEvent = filters.disabledTypes.some((disabledType) => {
+              const [type, name = null, kind = null] = disabledType.split(":");
+              if (type !== evt.type) {
+                return false;
+              } else if (name && name !== evt.name) {
+                return false;
+              } else if (kind && kind !== evt.kind) {
+                return false;
+              } else {
+                return true;
+              }
+            });
+            return !hideEvent;
           });
 
-          evts = fuse.search(filters.search).map((i) => i.item);
-        }
-
-        evts = evts.filter((evt) => {
-          const hideEvent = filters.disabledTypes.some((disabledType) => {
-            const [type, name = null, kind = null] = disabledType.split(":");
-            if (type !== evt.type) {
-              return false;
-            } else if (name && name !== evt.name) {
-              return false;
-            } else if (kind && kind !== evt.kind) {
-              return false;
-            } else {
-              return true;
-            }
+          evts.forEach((evt) => {
+            evt.duration = evt.end - evt.start;
           });
-          return !hideEvent;
+
+          evts.sort((first, second) => {
+            const larger = sort.descending ? second : first;
+            const smaller = sort.descending ? first : second;
+
+            const isString =
+              typeof larger[sort.column] === "string" ||
+              typeof smaller[sort.column] === "string";
+
+            return isString
+              ? larger[sort.column].localeCompare(smaller[sort.column])
+              : larger[sort.column] - smaller[sort.column];
+          });
+
+          setProfileEvents(evts);
+        })
+        .catch((err) => {
+          console.error(err);
+          setHasProfiler(false);
         });
-
-        evts.forEach((evt) => {
-          evt.duration = evt.end - evt.start;
-        });
-
-        evts.sort((first, second) => {
-          const larger = sort.descending ? second : first;
-          const smaller = sort.descending ? first : second;
-
-          const isString =
-            typeof larger[sort.column] === "string" ||
-            typeof smaller[sort.column] === "string";
-
-          return isString
-            ? larger[sort.column].localeCompare(smaller[sort.column])
-            : larger[sort.column] - smaller[sort.column];
-        });
-
-        setProfileEvents(evts);
-      })
-      .catch((err) => {
-        console.error(err);
-        setHasProfiler(false);
-      });
+    } catch(e){}
   }, [getEvents, sort, filters]);
 
   const scope = useCss(css);

@@ -86,16 +86,29 @@ export default function Apps(props) {
                 <AppStatusOverride app={app} />
               </div>
               {importMaps.enabled && (
-                <div role="cell">
-                  <input
-                    className={always("import-override")}
-                    aria-label={`Input an import-map override url for ${app.name}`}
-                    value={importMaps.overrides[app.name] || ""}
-                    onChange={(e) => {
-                      importMaps.setOverride(app.name, e.target.value);
-                    }}
-                  />
-                </div>
+                <>
+                  <div role="cell">
+                    <input
+                      placeholder="Custom Import Name"
+                      className={always("import-override")}
+                      aria-label={`Custom package name for ${app.name}`}
+                      value={importMaps.customName[app.name] || ""}
+                      onChange={(e) => {
+                        let newCustomName = {...importMaps.customName, [app.name]: e.target.value};
+                        importMaps.setCustomName(newCustomName);
+                      }}
+                    />
+                    <input
+                      placeholder="New Import URl"
+                      className={always("import-override")}
+                      aria-label={`Input an import-map override url for ${app.name}`}
+                      value={importMaps.overrides[app.name] || ""}
+                      onChange={(e) => {
+                        importMaps.setOverride(app.name, e.target.value);
+                      }}
+                    />
+                  </div>
+                </>
               )}
             </div>
           ))}
