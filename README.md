@@ -4,6 +4,16 @@ A Firefox/Chrome devtools extension to provide utilities for helping with [singl
 
 [Full Documentation](https://single-spa.js.org/docs/devtools)
 
+## Quick Set Up
+
+- Just clone the repository.
+- `npm install` in the repository root.
+- For chrome: `npm run deploy:chrome` it will create a folder (web-ext-artifacts) with an zip file on it.
+- Unzip the created file.
+- On chrome go to extensions page.
+- Click on `Load unpacked`.
+- Select the uncompressed folder.
+
 ## Feature requests
 
 If you would like to request a feature to be added, please open an issue with the title "Enhancement:"
